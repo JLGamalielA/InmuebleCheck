@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_auth"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.inmueblecheck.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_gerenteDashboardFragment"
+            app:destination="@id/gerenteDashboardFragment"
+            app:popUpTo="@id/nav_auth"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_agenteDashboardFragment"
+            app:destination="@id/agenteDashboardFragment"
+            app:popUpTo="@id/nav_auth"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.inmueblecheck.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- App del Gerente -->
+    <fragment
+        android:id="@+id/gerenteDashboardFragment"
+        android:name="com.example.inmueblecheck.GerenteDashboardFragment"
+        android:label="Gerente"
+        tools:layout="@layout/fragment_gerente_dashboard" >
+        <action
+            android:id="@+id/action_gerenteDashboardFragment_to_crearInspeccionFragment"
+            app:destination="@id/crearInspeccionFragment" />
+
+        <action
+            android:id="@+id/action_gerenteDashboardFragment_to_gerenteDetalleFragment"
+            app:destination="@id/gerenteDetalleFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/crearInspeccionFragment"
+        android:name="com.example.inmueblecheck.CrearInspeccionFragment"
+        android:label="Crear Inspección"
+        tools:layout="@layout/dialog_crear_inspeccion" />
+
+    <!-- Agente -->
+    <fragment
+        android:id="@+id/agenteDashboardFragment"
+        android:name="com.example.inmueblecheck.AgenteDashboardFragment"
+        android:label="fragment_agente_dashboard"
+        tools:layout="@layout/fragment_agente_dashboard" >
+        <action
+            android:id="@+id/action_agenteDashboardFragment_to_detalleInspeccionFragment"
+            app:destination="@id/detalleInspeccionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detalleInspeccionFragment"
+        android:name="com.example.inmueblecheck.DetalleInspeccionFragment"
+        android:label="fragment_detalle_inspeccion"
+        tools:layout="@layout/fragment_detalle_inspeccion" >
+        <argument
+            android:name="inspectionId"
+            app:argType="string" />
+        <argument
+            android:name="direccion"
+            app:argType="string" />
+    </fragment>
+
+    <!--  Gerente -->
+    <fragment
+        android:id="@+id/gerenteDetalleFragment"
+        android:name="com.example.inmueblecheck.GerenteDetalleFragment"
+        android:label="Detalle de Inspección"
+        tools:layout="@layout/fragment_gerente_detalle" >
+        <argument
+            android:name="inspectionId"
+            app:argType="string" />
+        <argument
+            android:name="direccion"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

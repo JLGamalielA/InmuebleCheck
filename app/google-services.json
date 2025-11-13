@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "656503472919",
+    "project_id": "inmuebles-6091a",
+    "storage_bucket": "inmuebles-6091a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656503472919:android:7d96072dd35a0c7b23ad52",
+        "android_client_info": {
+          "package_name": "com.example.inmueblecheck"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVKgJaGspQtEHiOPMD-nI50SB0dT6WPaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
