@@ -71,8 +71,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                         .centerCrop()
                         .into(ivMedia);
 
-                // Icono superpuesto para indicar que es video (opcional, visualmente recomendado)
-                // Aquí asumimos que el ImageView tiene un click listener
+                // Icono superpuesto para indicar que es video 
             } else {
                 Glide.with(context)
                         .load(media.getRemoteUri() != null ? media.getRemoteUri() : media.getLocalUri())
@@ -82,7 +81,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                         .into(ivMedia);
             }
 
-            // --- NUEVO: Clic para abrir el archivo (Imagen o Video) ---
+
             itemView.setOnClickListener(v -> {
                 String uriString = media.getRemoteUri() != null ? media.getRemoteUri() : media.getLocalUri();
                 if (uriString != null) {
