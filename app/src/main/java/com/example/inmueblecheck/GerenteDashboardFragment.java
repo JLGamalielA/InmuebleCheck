@@ -45,6 +45,7 @@ public class GerenteDashboardFragment extends Fragment {
         fab = view.findViewById(R.id.fabCrearInspeccion);
         toolbar = view.findViewById(R.id.toolbarGerente);
         viewModel = new ViewModelProvider(requireActivity()).get(GerenteViewModel.class);
+        progressBar.setVisibility(View.VISIBLE);
 
         setupRecyclerView();
         setupClickListeners();
@@ -58,6 +59,11 @@ public class GerenteDashboardFragment extends Fragment {
 
         // Listener de Clic (Bug #3)
         adapter.setOnInspeccionClickListener(inspeccion -> {
+            if (getView() == null) return;
+            if (inspeccion == null || inspeccion.getDocumentId() == null) {
+                Toast.makeText(getContext(), "Error: Datos de inspección inválidos.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Bundle args = new Bundle();
             args.putString("inspectionId", inspeccion.getDocumentId());
             args.putString("direccion", inspeccion.getDireccion());
@@ -95,17 +101,14 @@ public class GerenteDashboardFragment extends Fragment {
         viewModel.getInspecciones().observe(getViewLifecycleOwner(), inspecciones -> {
             adapter.setInspecciones(inspecciones);
             progressBar.setVisibility(View.GONE);
-
-
             fab.show();
         });
-
-        viewModel.fetchInspecciones();
 
         // Observador para errores
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                viewModel.clearError();
             }
         });
     }

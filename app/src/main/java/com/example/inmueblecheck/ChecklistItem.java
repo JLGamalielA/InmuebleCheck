@@ -12,6 +12,7 @@ public class ChecklistItem {
     @PrimaryKey
     @NonNull
     private String itemId;
+
     private String inspectionId;
     private String itemName;
     private String notes;
@@ -22,7 +23,7 @@ public class ChecklistItem {
         this.isCompleted = false;
     }
 
-    @Ignore // Ignoramos este constructor para Room
+    @Ignore
     public ChecklistItem(String inspectionId, String itemName, String notes) {
         this.itemId = java.util.UUID.randomUUID().toString();
         this.inspectionId = inspectionId;
@@ -33,16 +34,80 @@ public class ChecklistItem {
 
     // --- Getters y Setters ---
     @NonNull
-    public String getItemId() { return itemId; }
-    public void setItemId(@NonNull String itemId) { this.itemId = itemId; }
-    public String getInspectionId() { return inspectionId; }
-    public void setInspectionId(String inspectionId) { this.inspectionId = inspectionId; }
-    public String getItemName() { return itemName; }
-    public void setItemName(String itemName) { this.itemName = itemName; }
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(@NonNull String itemId) {
+        this.itemId = itemId;
+    }
+
+    public String getInspectionId() {
+        return inspectionId;
+    }
+
+    public void setInspectionId(String inspectionId) {
+        this.inspectionId = inspectionId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
     @Exclude
-    public boolean isCompleted() { return isCompleted; }
-    public void setCompleted(boolean completed) { isCompleted = completed; }
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
+    }
+
+    @Exclude
+    public boolean isChecked() {
+        return isCompleted;
+    }
+
+    @Exclude
+    public void setChecked(boolean checked) {
+        this.isCompleted = checked;
+    }
+
+    @Exclude
+    public String getNombre() {
+        return itemName;
+    }
+
+    @Exclude
+    public void setNombre(String nombre) {
+        this.itemName = nombre;
+    }
+
+    @Exclude
+    public String getNotas() {
+        return notes;
+    }
+
+    @Override
+    public String toString() {
+        return "ChecklistItem{" +
+                "itemId='" + itemId + '\'' +
+                ", inspectionId='" + inspectionId + '\'' +
+                ", itemName='" + itemName + '\'' +
+                ", notes='" + notes + '\'' +
+                ", isCompleted=" + isCompleted +
+                '}';
+    }
 }

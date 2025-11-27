@@ -83,14 +83,13 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
     }
 
 
-    // --- ViewHolder Interno ---
     static class ChecklistItemViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvItemName;
         private Button btnCamera, btnVideo;
         private EditText editTextNotes;
         private TextInputLayout tilNotes;
-        private boolean isBinding = false; // Flag para evitar bucles en TextWatcher
+        private boolean isBinding = false;
 
         public ChecklistItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -108,9 +107,9 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
                 editTextNotes.removeTextChangedListener(oldWatcher);
             }
 
-            isBinding = true; // Activar flag
+            isBinding = true;
             editTextNotes.setText(item.getNotes());
-            isBinding = false; // Desactivar flag
+            isBinding = false;
 
             TextWatcher newWatcher = new TextWatcher() {
                 @Override
@@ -129,7 +128,7 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
                 }
             };
             editTextNotes.addTextChangedListener(newWatcher);
-            editTextNotes.setTag(newWatcher); // Guardar el listener para poder quitarlo luego
+            editTextNotes.setTag(newWatcher);
 
             btnCamera.setOnClickListener(v -> {
                 if (listener != null) {

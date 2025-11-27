@@ -1,141 +1,240 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:padding="24dp"
-    tools:context=".LoginFragment">
+    tools:context=".RegisterFragment">
 
+    <!-- 1. Imagen de Perfil / Avatar (Estilo circular) -->
+    <ImageView
+        android:id="@+id/ivAvatarPlaceholder"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/ic_launcher_background"
+        android:backgroundTint="@color/blue_primary"
+        android:layout_marginTop="40dp"
+        android:padding="20dp"
+        android:src="@drawable/account"
+        app:tint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Título -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="InmuebleCheck"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+        android:layout_marginTop="24dp"
+        android:text="Crear tu cuenta"
+        android:textColor="@color/black"
+        android:textSize="26sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="32dp"/>
+        app:layout_constraintTop_toBottomOf="@+id/ivAvatarPlaceholder" />
 
+    <!-- 3. Subtítulo -->
     <TextView
         android:id="@+id/tvSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Crear Cuenta"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        android:layout_marginTop="48dp"/>
-
-    <!-- Email -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilEmailRegister"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Correo Electrónico"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Gestiona tus inspecciones e inmuebles."
+        android:textColor="@color/gray_text"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
-        android:layout_marginTop="16dp">
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+    <!-- 4. Campo Nombre (Visualmente agregado para coincidir con imagen, opcional en lógica) -->
+    <!-- Nota: Tu lógica actual no procesa 'Nombre', así que este es solo visual
+         o para futura implementación. Si no lo quieres, puedes borrar este bloque. -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilNameRegister"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:hint="Nombre completo"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:boxStrokeColor="@color/blue_primary"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/gray_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvSubtitle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etNameRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 5. Campo Email -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilEmailRegister"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Correo electrónico"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:boxStrokeColor="@color/blue_primary"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/gray_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tilNameRegister">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmailRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Password -->
+    <!-- 6. Campo Password -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilPasswordRegister"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Contraseña (mín. 6 caracteres)"
+        android:layout_marginTop="8dp"
+        android:hint="Contraseña"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:boxStrokeColor="@color/blue_primary"
+        app:boxStrokeWidth="1dp"
         app:endIconMode="password_toggle"
+        app:hintTextColor="@color/gray_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilEmailRegister"
-        android:layout_marginTop="16dp">
+        app:layout_constraintTop_toBottomOf="@+id/tilEmailRegister">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPasswordRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Selección de Rol (¡Importante!) -->
+    <!-- 7. Selección de Rol (Estilizada) -->
     <TextView
         android:id="@+id/tvRoleLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Selecciona tu rol:"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:layout_marginTop="24dp"
+        android:text="Registrarse como:"
+        android:textColor="@color/gray_text"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilPasswordRegister"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintTop_toBottomOf="@+id/tilPasswordRegister" />
 
     <RadioGroup
         android:id="@+id/radioGroupRole"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
+        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvRoleLabel"
-        android:layout_marginTop="8dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRoleLabel">
 
         <RadioButton
             android:id="@+id/radioAgente"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            app:buttonTint="@color/selector_radio_button"
+            android:checked="true"
+            android:paddingStart="8dp"
             android:text="Agente"
-            android:checked="true"/>
+            android:textColor="@color/selector_radio_button"
+            android:textSize="16sp" />
 
+        <!-- RadioButton GERENTE con selector de color -->
         <RadioButton
             android:id="@+id/radioGerente"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            app:buttonTint="@color/selector_radio_button"
+            android:paddingStart="8dp"
             android:text="Gerente"
-            android:layout_marginStart="16dp"/>
+            android:textColor="@color/selector_radio_button"
+            android:textSize="16sp" />
     </RadioGroup>
 
-    <Button
+    <!-- 8. Botón Sign Up -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegister"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Registrarme"
-        android:padding="12dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/blue_primary"
+        android:text="Registrarse"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:cornerRadius="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/radioGroupRole"
-        android:layout_marginTop="24dp"/>
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupRole" />
 
-    <TextView
-        android:id="@+id/tvGoToLogin"
+    <!-- 9. Footer Login -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="¿Ya tienes cuenta? Inicia sesión."
+        android:layout_marginBottom="24dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnRegister"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"/>
+        app:layout_constraintTop_toBottomOf="@+id/btnRegister"
+        app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿Ya tienes cuenta? "
+            android:textColor="@color/gray_text" />
+
+        <TextView
+            android:id="@+id/tvGoToLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:text="Inicia sesión"
+            android:textColor="@color/blue_primary"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progressBarRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="@color/blue_primary"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

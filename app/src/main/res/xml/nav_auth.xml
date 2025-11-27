@@ -65,7 +65,12 @@
         <action
             android:id="@+id/action_agenteDashboardFragment_to_detalleInspeccionFragment"
             app:destination="@id/detalleInspeccionFragment" />
+
+        <action
+            android:id="@+id/action_agenteDashboardFragment_to_crearInspeccionFragment"
+            app:destination="@id/crearInspeccionFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/detalleInspeccionFragment"
         android:name="com.example.inmueblecheck.DetalleInspeccionFragment"
@@ -79,7 +84,6 @@
             app:argType="string" />
     </fragment>
 
-    <!--  Gerente -->
     <fragment
         android:id="@+id/gerenteDetalleFragment"
         android:name="com.example.inmueblecheck.GerenteDetalleFragment"

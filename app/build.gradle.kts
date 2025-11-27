@@ -51,6 +51,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")  //Servicios de Ubicación (GPS)
     implementation("com.github.bumptech.glide:glide:4.16.0")  //Carga de Imágenes desde URL
     implementation("com.google.guava:guava:31.0.1-android")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation(libs.appcompat)

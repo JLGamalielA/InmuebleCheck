@@ -58,24 +58,33 @@ public class InspeccionRepository {
     private void fetchInspectionsFromFirestore(String agentId) {
         db.collection("inspecciones")
                 .whereEqualTo("agentId", agentId)
-                //.whereEqualTo("status", "pendiente") // Comentado para que sincronice todos
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Inspeccion> inspections = new ArrayList<>();
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        Inspeccion insp = doc.toObject(Inspeccion.class);
-                        if (insp != null) {
-                            insp.setDocumentId(doc.getId());
-                            inspections.add(insp);
-                        }
+                .orderBy("fechaCreacion", Query.Direction.DESCENDING)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+
+                    if (e != null) {
+                        Log.e(TAG, "Error al escuchar Firestore", e);
+                        return;
                     }
-                    executor.execute(() -> inspeccionDao.insertAll(inspections));
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Error fetching from Firestore", e));
+
+                    if (queryDocumentSnapshots != null) {
+                        List<Inspeccion> inspections = new ArrayList<>();
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            Inspeccion insp = doc.toObject(Inspeccion.class);
+                            if (insp != null) {
+
+                                insp.setDocumentId(doc.getId());
+                                inspections.add(insp);
+                            }
+                        }
+                        // Guardamos la lista actualizada en Room en un hilo separado
+                        executor.execute(() -> inspeccionDao.insertAll(inspections));
+                    }
+                });
     }
 
 
     public LiveData<List<ChecklistItem>> getChecklistForInspection(String inspectionId) {
+
         return inspeccionDao.getChecklistForInspection(inspectionId);
     }
 
@@ -102,7 +111,7 @@ public class InspeccionRepository {
     }
 
     public void saveChecklistAndFinalizeInspection(String inspectionId, List<ChecklistItem> items, double latitude, double longitude) {
-        executor.execute(() -> { // <-- Inicia el hilo de fondo
+        executor.execute(() -> {
 
             // Guarda cada item del checklist
             for (ChecklistItem item : items) {
@@ -123,7 +132,7 @@ public class InspeccionRepository {
     // Encola el SyncWorker
     private void scheduleSync() {
         Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED) // Solo Wi-Fi
+                .setRequiredNetworkType(NetworkType.CONNECTED) // Solo Wi-Fi
                 .build();
 
         OneTimeWorkRequest syncWorkRequest = new OneTimeWorkRequest.Builder(SyncWorker.class)

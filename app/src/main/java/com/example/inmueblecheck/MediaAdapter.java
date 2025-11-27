@@ -1,6 +1,8 @@
 package com.example.inmueblecheck;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,19 +58,46 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
         }
 
         public void bind(Media media, Context context) {
-            String label = media.getItemName() + " (" + media.getType() + ")";
+            String label = media.getItemName();
             tvMediaItemName.setText(label);
 
+            // Configuración de Glide para imágenes y videos
             if ("video".equals(media.getType())) {
-                ivMedia.setImageResource(android.R.drawable.ic_media_play); // Placeholder para video
-            } else {
-                // Carga la imagen desde la URL de Firebase Storage
+                // Glide puede generar miniaturas de videos locales o remotos
                 Glide.with(context)
-                        .load(media.getRemoteUri()) // Carga la URL remota
-                        .placeholder(android.R.drawable.stat_sys_download) // Icono de "cargando"
-                        .error(android.R.drawable.ic_dialog_alert) // Icono de error
+                        .asBitmap() // Forzar carga como imagen (frame del video)
+                        .load(media.getRemoteUri() != null ? media.getRemoteUri() : media.getLocalUri())
+                        .placeholder(android.R.drawable.ic_media_play)
+                        .centerCrop()
+                        .into(ivMedia);
+
+                // Icono superpuesto para indicar que es video (opcional, visualmente recomendado)
+                // Aquí asumimos que el ImageView tiene un click listener
+            } else {
+                Glide.with(context)
+                        .load(media.getRemoteUri() != null ? media.getRemoteUri() : media.getLocalUri())
+                        .placeholder(android.R.drawable.stat_sys_download)
+                        .error(android.R.drawable.ic_dialog_alert)
+                        .centerCrop()
                         .into(ivMedia);
             }
+
+            // --- NUEVO: Clic para abrir el archivo (Imagen o Video) ---
+            itemView.setOnClickListener(v -> {
+                String uriString = media.getRemoteUri() != null ? media.getRemoteUri() : media.getLocalUri();
+                if (uriString != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    String mimeType = "video".equals(media.getType()) ? "video/*" : "image/*";
+                    intent.setDataAndType(Uri.parse(uriString), mimeType);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        context.startActivity(intent);
+                    } catch (Exception e) {
+                        // Fallback si no hay app para abrir
+                    }
+                }
+            });
+            // ----------------------------------------------------------
         }
     }
 }

@@ -54,5 +54,5 @@ public interface InspeccionDao {
     List<Media> getMediaToSync(String inspectionId);
 
     @Update
-    void updateMedia(Media media); // Para marcar como "synced"
+    void updateMedia(Media media);
 }

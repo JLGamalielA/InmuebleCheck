@@ -2,7 +2,6 @@ package com.example.inmueblecheck;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -31,7 +30,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.io.File;
 import java.io.IOException;
@@ -53,21 +51,22 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
     private FusedLocationProviderClient fusedLocationClient;
     private String inspectionId, direccion;
     private Location lastKnownLocation;
-    private String currentPhotoPath;
     private Uri currentMediaUri;
-    private String currentItemName; // Para saber a qué item pertenece la foto/video
-    private String currentMediaType; // Para "photo" o "video"
-    private ActivityResultLauncher<String[]> locationPermissionLauncher;
+    private String currentItemName;
+    private String currentMediaType;
+    private ActivityResultLauncher<String> locationPermissionLauncher;
     private ActivityResultLauncher<String[]> cameraPermissionLauncher;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<Intent> videoLauncher;
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        // Inicializar launchers
+
+        if (getContext() != null) {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        }
+
         registerPermissionLaunchers();
         registerMediaLaunchers();
     }
@@ -81,73 +80,161 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        tvDireccion = view.findViewById(R.id.tvDireccionDetalle);
-        tvGpsStatus = view.findViewById(R.id.tvGpsStatus);
-        btnVerificarGps = view.findViewById(R.id.btnVerificarGps);
-        btnFinalizarInspeccion = view.findViewById(R.id.btnFinalizarInspeccion);
-        progressBarDetalle = view.findViewById(R.id.progressBarDetalle);
-        toolbarDetalle = view.findViewById(R.id.toolbarDetalle);
-        recyclerViewChecklist = view.findViewById(R.id.recyclerViewChecklist);
 
-        if (getArguments() != null) {
-            inspectionId = getArguments().getString("inspectionId");
-            direccion = getArguments().getString("direccion");
-            tvDireccion.setText(direccion);
-            toolbarDetalle.setTitle("Inspección: " + direccion);
-        }
-        viewModel = new ViewModelProvider(this).get(DetalleInspeccionViewModel.class);
-        setupRecyclerView();
-        setupClickListeners();
-        setupObservers();
-        viewModel.loadChecklist(inspectionId);
-    }
+        try {
+            // Inicializar vistas
+            tvDireccion = view.findViewById(R.id.tvDireccionDetalle);
+            tvGpsStatus = view.findViewById(R.id.tvGpsStatus);
+            btnVerificarGps = view.findViewById(R.id.btnVerificarGps);
+            btnFinalizarInspeccion = view.findViewById(R.id.btnFinalizarInspeccion);
+            progressBarDetalle = view.findViewById(R.id.progressBarDetalle);
+            toolbarDetalle = view.findViewById(R.id.toolbarDetalle);
+            recyclerViewChecklist = view.findViewById(R.id.recyclerViewChecklist);
 
-    private void setupRecyclerView() {
-        adapter = new ChecklistAdapter(this);
-        recyclerViewChecklist.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerViewChecklist.setAdapter(adapter);
-    }
-
-    private void setupObservers() {
-        viewModel.getChecklist().observe(getViewLifecycleOwner(), checklistItems -> {
-            if (checklistItems != null) {
-                adapter.setChecklist(checklistItems);
+            if (progressBarDetalle != null) {
+                progressBarDetalle.setVisibility(View.VISIBLE);
             }
-        });
-
-        viewModel.getSaveStatus().observe(getViewLifecycleOwner(), status -> {
-            if (status) {
-                Toast.makeText(getContext(), "Inspección guardada localmente y encolada para sincronizar.", Toast.LENGTH_LONG).show();
-                // Regresar al dashboard del agente
-                Navigation.findNavController(getView()).popBackStack();
+            if (recyclerViewChecklist != null) {
+                recyclerViewChecklist.setVisibility(View.GONE);
             }
-        });
-    }
 
-    private void setupClickListeners() {
-        // Botón GPS
-        btnVerificarGps.setOnClickListener(v -> checkLocationPermission());
-        // Botón Finalizar
-        btnFinalizarInspeccion.setOnClickListener(v -> {
-            if (lastKnownLocation == null) {
-                Toast.makeText(getContext(), "Debe verificar la ubicación GPS primero.", Toast.LENGTH_SHORT).show();
+            // Obtener argumentos
+            if (getArguments() != null) {
+                inspectionId = getArguments().getString("inspectionId");
+                direccion = getArguments().getString("direccion");
+                Log.d(TAG, "Argumentos recibidos - ID: " + inspectionId + ", Dirección: " + direccion);
+            }
+
+            // Validar inspectionId
+            if (inspectionId == null || inspectionId.isEmpty()) {
+                Log.e(TAG, "inspectionId es nulo o vacío");
+                Toast.makeText(getContext(), "Error: ID de inspección no válido.", Toast.LENGTH_LONG).show();
+                Navigation.findNavController(view).popBackStack();
                 return;
             }
 
-            // Obtener la lista desde el adaptador
-            List<ChecklistItem> items = adapter.getItems();
+            // Mostrar información
+            String titulo = (direccion != null && !direccion.isEmpty()) ? direccion : "Detalle";
+            if (tvDireccion != null) {
+                tvDireccion.setText(titulo);
+            }
+            if (toolbarDetalle != null) {
+                toolbarDetalle.setTitle("Inspección: " + titulo);
+                toolbarDetalle.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+            }
 
-            // Guardar
-            viewModel.saveOfflineEvidence(
-                    inspectionId,
-                    items,
-                    lastKnownLocation.getLatitude(),
-                    lastKnownLocation.getLongitude()
-            );
-        });
+            // Inicializar ViewModel
+            viewModel = new ViewModelProvider(this).get(DetalleInspeccionViewModel.class);
+            // Configurar RecyclerView
+            setupRecyclerView();
+            // Configurar listeners
+            setupClickListeners();
+            // Configurar observers - AQUÍ ES DONDE ESTABA EL ERROR
+            setupObservers();
+            // Cargar datos
+            viewModel.loadChecklist(inspectionId);
 
-        // Botón de Volver (Toolbar)
-        toolbarDetalle.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        } catch (Exception e) {
+            Log.e(TAG, "Error en onViewCreated", e);
+            Toast.makeText(getContext(), "Error al cargar la inspección", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(view).popBackStack();
+        }
+    }
+
+    private void setupRecyclerView() {
+        if (recyclerViewChecklist == null) {
+            Log.e(TAG, "recyclerViewChecklist es nulo");
+            return;
+        }
+
+        adapter = new ChecklistAdapter(this);
+        recyclerViewChecklist.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerViewChecklist.setAdapter(adapter);
+        Log.d(TAG, "RecyclerView configurado");
+    }
+
+    private void setupObservers() {
+        if (viewModel == null) {
+            Log.e(TAG, "ViewModel es nulo en setupObservers");
+            Toast.makeText(getContext(), "Error: ViewModel no inicializado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            // Observer para el checklist
+            viewModel.getChecklist().observe(getViewLifecycleOwner(), checklistItems -> {
+                Log.d(TAG, "Checklist actualizado: " + (checklistItems != null ? checklistItems.size() : 0) + " items");
+
+                if (progressBarDetalle != null) {
+                    progressBarDetalle.setVisibility(View.GONE);
+                }
+
+                if (checklistItems != null && !checklistItems.isEmpty()) {
+                    if (adapter != null) {
+                        adapter.setChecklist(checklistItems);
+                    }
+                    if (recyclerViewChecklist != null) {
+                        recyclerViewChecklist.setVisibility(View.VISIBLE);
+                    }
+                    Log.d(TAG, "Checklist mostrado con " + checklistItems.size() + " items");
+                } else {
+                    Log.w(TAG, "Checklist vacío o nulo");
+                    if (recyclerViewChecklist != null) {
+                        recyclerViewChecklist.setVisibility(View.GONE);
+                    }
+                    if (tvDireccion != null) {
+                        tvDireccion.setText("No hay items en el checklist");
+                    }
+                }
+            });
+
+            // estado de guardado
+            viewModel.getSaveStatus().observe(getViewLifecycleOwner(), status -> {
+                Log.d(TAG, "Status de guardado: " + status);
+
+                if (status != null && status) {
+                    Toast.makeText(getContext(), "Inspección guardada correctamente.", Toast.LENGTH_LONG).show();
+                    if (getView() != null) {
+                        Navigation.findNavController(getView()).popBackStack();
+                    }
+                } else if (status != null) {
+                    Toast.makeText(getContext(), "Error al guardar la inspección.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error configurando observers", e);
+            Toast.makeText(getContext(), "Error al configurar observadores", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupClickListeners() {
+        if (btnVerificarGps != null) {
+            btnVerificarGps.setOnClickListener(v -> checkLocationPermission());
+        }
+
+        if (btnFinalizarInspeccion != null) {
+            btnFinalizarInspeccion.setOnClickListener(v -> {
+                if (lastKnownLocation == null) {
+                    Toast.makeText(getContext(), "Debe verificar la ubicación GPS primero.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (adapter != null) {
+                    List<ChecklistItem> items = adapter.getItems();
+                    if (items != null && !items.isEmpty()) {
+                        viewModel.saveOfflineEvidence(
+                                inspectionId,
+                                items,
+                                lastKnownLocation.getLatitude(),
+                                lastKnownLocation.getLongitude()
+                        );
+                    } else {
+                        Toast.makeText(getContext(), "No hay items para guardar", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -164,15 +251,25 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
 
     @Override
     public void onNotesChanged(String itemName, String notes) {
-
         if (adapter != null) {
             adapter.updateNotesForItem(itemName, notes);
         }
     }
 
-
-
     private void registerPermissionLaunchers() {
+        locationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        getDeviceLocation();
+                    } else {
+                        Toast.makeText(getContext(), "Permiso de ubicación denegado.", Toast.LENGTH_SHORT).show();
+                        if (tvGpsStatus != null) {
+                            tvGpsStatus.setText("Se requiere permiso de ubicación.");
+                        }
+                    }
+                });
+
         cameraPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(), result -> {
                     Boolean cameraOk = result.get(Manifest.permission.CAMERA);
@@ -190,11 +287,16 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
     }
 
     private void checkLocationPermission() {
+        if (getContext() == null) {
+            Log.w(TAG, "Context es nulo en checkLocationPermission");
+            return;
+        }
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             getDeviceLocation();
         } else {
-            locationPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
@@ -204,13 +306,30 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
                     .addOnSuccessListener(requireActivity(), location -> {
                         if (location != null) {
                             lastKnownLocation = location;
-                            String gpsText = "GPS OK: " + location.getLatitude() + ", " + location.getLongitude();
-                            tvGpsStatus.setText(gpsText);
-                            tvGpsStatus.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_green_dark));
-                            btnVerificarGps.setText("GPS Verificado");
-                            btnVerificarGps.setEnabled(false);
+                            String gpsText = "Ubicación: " + location.getLatitude() + ", " + location.getLongitude() + "\n(Toca para ver en Mapa)";
+                            if (tvGpsStatus != null) {
+                                tvGpsStatus.setText(gpsText);
+                                tvGpsStatus.setTextColor(ContextCompat.getColor(getContext(), android.R.color.holo_green_dark));
+                                tvGpsStatus.setOnClickListener(v -> {
+                                    Uri gmmIntentUri = Uri.parse("geo:" + location.getLatitude() + "," + location.getLongitude() + "?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + direccion + ")");
+                                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                                    mapIntent.setPackage("com.google.android.apps.maps");
+                                    if (mapIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+                                        startActivity(mapIntent);
+                                    } else {
+                                        Toast.makeText(getContext(), "Instala Google Maps para ver la ubicación", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            if (btnVerificarGps != null) {
+                                btnVerificarGps.setText("GPS Verificado");
+                                btnVerificarGps.setEnabled(false);
+                            }
                         } else {
-                            tvGpsStatus.setText("No se pudo obtener ubicación. Intente de nuevo.");
+                            if (tvGpsStatus != null) {
+                                tvGpsStatus.setText("No se pudo obtener ubicación. Intente de nuevo.");
+                            }
                             Toast.makeText(getContext(), "Active el GPS y asegúrese de tener vista al cielo.", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -231,7 +350,9 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (currentMediaUri != null) {
                             Log.d(TAG, "Foto guardada en: " + currentMediaUri.toString());
-                            viewModel.saveMedia(inspectionId, currentItemName, currentMediaUri.toString(), "image");
+                            if (viewModel != null) {
+                                viewModel.saveMedia(inspectionId, currentItemName, currentMediaUri.toString(), "image");
+                            }
                         }
                     }
                 });
@@ -242,7 +363,9 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (currentMediaUri != null) {
                             Log.d(TAG, "Video guardado en: " + currentMediaUri.toString());
-                            viewModel.saveMedia(inspectionId, currentItemName, currentMediaUri.toString(), "video");
+                            if (viewModel != null) {
+                                viewModel.saveMedia(inspectionId, currentItemName, currentMediaUri.toString(), "video");
+                            }
                         }
                     }
                 });
@@ -252,13 +375,7 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + inspectionId + "_" + currentItemName + "_" + timeStamp + "_";
         File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
-        );
-        currentPhotoPath = image.getAbsolutePath(); // Guardar path
-        return image;
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
 
     private void dispatchTakePictureIntent() {
@@ -283,12 +400,7 @@ public class DetalleInspeccionFragment extends Fragment implements ChecklistAdap
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String videoFileName = "MP4_" + inspectionId + "_" + currentItemName + "_" + timeStamp + "_";
         File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_MOVIES);
-        File video = File.createTempFile(
-                videoFileName,
-                ".mp4",
-                storageDir
-        );
-        return video;
+        return File.createTempFile(videoFileName, ".mp4", storageDir);
     }
 
     private void dispatchTakeVideoIntent() {

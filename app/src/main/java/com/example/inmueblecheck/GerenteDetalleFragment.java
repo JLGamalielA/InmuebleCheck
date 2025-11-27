@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
@@ -45,6 +46,12 @@ public class GerenteDetalleFragment extends Fragment {
             direccion = getArguments().getString("direccion");
         }
 
+        if (inspectionId == null) {
+            Toast.makeText(getContext(), "Error: ID de inspección no válido.", Toast.LENGTH_LONG).show();
+            Navigation.findNavController(view).popBackStack();
+            return;
+        }
+
         // Bindeo de Vistas
         toolbar = view.findViewById(R.id.toolbarGerenteDetalle);
         progressBar = view.findViewById(R.id.progressBarGerenteDetalle);
@@ -53,13 +60,15 @@ public class GerenteDetalleFragment extends Fragment {
         tvGps = view.findViewById(R.id.tvGpsGerenteDetalle);
         rvChecklist = view.findViewById(R.id.recyclerViewChecklistGerente);
         rvMedia = view.findViewById(R.id.recyclerViewMediaGerente);
-        toolbar.setTitle("Inspección: " + direccion); // Configurar Toolbar
+        String tituloToolbar = (direccion != null) ? direccion : "Detalle";
+        toolbar.setTitle("Inspección: " + tituloToolbar);
         toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         setupRecyclerViews(); // Configurar RecyclerViews
         viewModel = new ViewModelProvider(this).get(GerenteDetalleViewModel.class); // Configurar ViewModel
         setupObservers(); // Configurar Observadores
         viewModel.loadInspeccionDetalle(inspectionId); // Cargar los datos
     }
+
 
     private void setupRecyclerViews() {
         // Checklist

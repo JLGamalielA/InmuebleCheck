@@ -17,12 +17,16 @@ public class GerenteViewModel extends ViewModel {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private MutableLiveData<List<Inspeccion>> inspecciones = new MutableLiveData<>();
     private MutableLiveData<String> error = new MutableLiveData<>();
-
     private MutableLiveData<Boolean> saveSuccess = new MutableLiveData<>();
+    public GerenteViewModel() {
+        fetchInspecciones();
+    }
     public LiveData<List<Inspeccion>> getInspecciones() { return inspecciones; }
     public LiveData<String> getError() { return error; }
     public LiveData<Boolean> getSaveSuccess() { return saveSuccess; }
     public void resetSaveSuccess() { saveSuccess.setValue(false); }
+    public void clearError() { error.setValue(null); }
+
 
 
     // Carga las inspecciones

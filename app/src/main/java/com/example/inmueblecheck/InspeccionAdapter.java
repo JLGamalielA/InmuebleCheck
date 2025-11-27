@@ -1,27 +1,29 @@
 package com.example.inmueblecheck;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.navigation.Navigation;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import java.text.SimpleDateFormat;
+
+import com.example.inmueblecheck.Inspeccion;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import android.os.Bundle;
 
 public class InspeccionAdapter extends RecyclerView.Adapter<InspeccionAdapter.InspeccionViewHolder> {
 
     private List<Inspeccion> listaInspecciones = new ArrayList<>();
+    private OnInspeccionClickListener clickListener;
 
     public interface OnInspeccionClickListener {
         void onInspeccionClick(Inspeccion inspeccion);
     }
-
-    private OnInspeccionClickListener clickListener;
 
     public void setOnInspeccionClickListener(OnInspeccionClickListener listener) {
         this.clickListener = listener;
@@ -48,7 +50,7 @@ public class InspeccionAdapter extends RecyclerView.Adapter<InspeccionAdapter.In
 
     @Override
     public int getItemCount() {
-        return listaInspecciones.size();
+        return listaInspecciones != null ? listaInspecciones.size() : 0;
     }
 
     static class InspeccionViewHolder extends RecyclerView.ViewHolder {
@@ -62,22 +64,38 @@ public class InspeccionAdapter extends RecyclerView.Adapter<InspeccionAdapter.In
         }
 
         public void bind(Inspeccion inspeccion, OnInspeccionClickListener listener) {
-            tvDireccion.setText(inspeccion.getDireccion());
-            tvAgenteEmail.setText(inspeccion.getAgentEmail());
+            Context context = itemView.getContext();
 
-            String statusText = "Estado: " + inspeccion.getStatus();
-            tvStatus.setText(statusText);
+            // Dirección
+            tvDireccion.setText(inspeccion.getDireccion() != null ? inspeccion.getDireccion() : "Sin Dirección");
 
-            int color;
-            if ("pendiente".equals(inspeccion.getStatus())) {
-                color = itemView.getContext().getResources().getColor(android.R.color.holo_orange_dark);
-            } else if ("completada".equals(inspeccion.getStatus())) {
-                color = itemView.getContext().getResources().getColor(android.R.color.holo_green_dark);
-            } else { // "pendiente_sync"
-                color = itemView.getContext().getResources().getColor(android.R.color.holo_blue_light);
+            // Email del Agente
+            String email = inspeccion.getAgentEmail();
+            tvAgenteEmail.setText((email != null && !email.isEmpty()) ? email : "Sin agente asignado");
+            String estado = inspeccion.getStatus();
+            if (estado == null || estado.isEmpty()) estado = "pendiente";
+
+            try {
+                String estadoFormato = estado.substring(0, 1).toUpperCase() + estado.substring(1);
+                tvStatus.setText(estadoFormato);
+            } catch (Exception e) {
+                tvStatus.setText(estado);
             }
-            tvStatus.setTextColor(color);
 
+            GradientDrawable background = (GradientDrawable) ContextCompat.getDrawable(context, R.drawable.bg_status_pending);
+            if (background != null) {
+                background = (GradientDrawable) background.getConstantState().newDrawable().mutate();
+                if ("completada".equalsIgnoreCase(estado)) {
+                    background.setColor(Color.parseColor("#E8F5E9"));
+                    tvStatus.setTextColor(Color.parseColor("#2E7D32"));
+                } else {
+                    background.setColor(Color.parseColor("#FFF3E0"));
+                    tvStatus.setTextColor(Color.parseColor("#F57C00"));
+                }
+                tvStatus.setBackground(background);
+            }
+
+            // Listeners
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onInspeccionClick(inspeccion);

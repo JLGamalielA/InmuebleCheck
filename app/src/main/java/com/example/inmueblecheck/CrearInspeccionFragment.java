@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CrearInspeccionFragment extends BottomSheetDialogFragment {
@@ -22,7 +23,7 @@ public class CrearInspeccionFragment extends BottomSheetDialogFragment {
     private TextInputEditText etDireccion;
     private AutoCompleteTextView spinnerAgente;
     private Button btnCrear;
-    private List<User> listaDeAgentes; // Para guardar la lista de agentes
+    private List<User> listaDeAgentes;
 
     @Nullable
     @Override
@@ -34,12 +35,9 @@ public class CrearInspeccionFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Bindeo de vistas
         etDireccion = view.findViewById(R.id.etDireccion);
         spinnerAgente = view.findViewById(R.id.spinnerAgente);
-        btnCrear = view.findViewById(R.id.btnCrearInspeccion);
-
-        // ViewModel
+        btnCrear = view.findViewById(R.id.btnCrear);
         viewModel = new ViewModelProvider(requireActivity()).get(GerenteViewModel.class);
         setupObservers();
         setupClickListeners();
@@ -48,50 +46,70 @@ public class CrearInspeccionFragment extends BottomSheetDialogFragment {
     private void setupObservers() {
         viewModel.fetchAgentes().observe(getViewLifecycleOwner(), agentes -> {
             if (agentes != null) {
-                this.listaDeAgentes = agentes; // Guarda la lista
-                // Extrae solo los emails para el ArrayAdapter
-                List<String> emails = new java.util.ArrayList<>();
+                this.listaDeAgentes = agentes;
+                List<String> emails = new ArrayList<>();
                 for (User agente : agentes) {
-                    emails.add(agente.getEmail());
+                    if (agente.getEmail() != null) {
+                        emails.add(agente.getEmail());
+                    }
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, emails);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, emails);
                 spinnerAgente.setAdapter(adapter);
             }
         });
 
         viewModel.getSaveSuccess().observe(getViewLifecycleOwner(), success -> {
-            if (success) {
-                Toast.makeText(getContext(), "Inspección creada", Toast.LENGTH_SHORT).show();
-                viewModel.resetSaveSuccess(); // Resetea el flag
-                dismiss(); // Cierra el diálogo
+            if (success != null && success) {
+                Toast.makeText(getContext(), "Inspección creada exitosamente", Toast.LENGTH_SHORT).show();
+                viewModel.resetSaveSuccess();
+                dismiss();
             }
         });
 
-        // Observador de Errores
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                viewModel.clearError();
             }
         });
     }
 
     private void setupClickListeners() {
         btnCrear.setOnClickListener(v -> {
-            String direccion = etDireccion.getText().toString().trim();
-            String emailSeleccionado = spinnerAgente.getText().toString();
+            // Validar Dirección
+            String direccion = "";
+            if (etDireccion.getText() != null) {
+                direccion = etDireccion.getText().toString().trim();
+            }
+            if (direccion.isEmpty()) {
+                etDireccion.setError("La dirección es requerida");
+                return;
+            }
 
+            // Validar Selección de Agente
+            String emailSeleccionado = spinnerAgente.getText().toString();
+            if (emailSeleccionado.isEmpty()) {
+                spinnerAgente.setError("Debes seleccionar un agente");
+                return;
+            }
+
+            // Buscar usuario correspondiente al email seleccionado
             User agenteSeleccionado = null;
-            // Busca el objeto User completo basado en el email
             if (listaDeAgentes != null) {
                 for (User agente : listaDeAgentes) {
-                    if (agente.getEmail().equals(emailSeleccionado)) {
+                    if (agente.getEmail() != null && agente.getEmail().equals(emailSeleccionado)) {
                         agenteSeleccionado = agente;
                         break;
                     }
                 }
             }
 
-            viewModel.crearInspeccion(direccion, agenteSeleccionado);
+            if (agenteSeleccionado != null) {
+                viewModel.crearInspeccion(direccion, agenteSeleccionado);
+            } else {
+                spinnerAgente.setError("El agente seleccionado no es válido");
+                Toast.makeText(getContext(), "El agente seleccionado no es válido", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

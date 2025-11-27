@@ -12,7 +12,9 @@ public class Inspeccion {
 
     @PrimaryKey
     @NonNull
-    private String documentId;
+    @Exclude
+    private String documentId = "";
+
     private String direccion;
     private String agentId;
     private String agentEmail;
@@ -22,8 +24,9 @@ public class Inspeccion {
     private Date fechaCreacion;
     private double latitud;
     private double longitud;
+
     public Inspeccion() {
-    }
+        }
 
     public Inspeccion(String direccion, String agentId, String agentEmail) {
         this.direccion = direccion;
@@ -33,21 +36,30 @@ public class Inspeccion {
     }
 
     // --- Getters y Setters ---
-    @NonNull
+
+    @Exclude // Excluir getter del ID para que no se guarde como campo
     public String getDocumentId() { return documentId; }
-    public void setDocumentId(@NonNull String documentId) { this.documentId = documentId; }
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
+
     public String getDireccion() { return direccion; }
     public void setDireccion(String direccion) { this.direccion = direccion; }
+
     public String getAgentId() { return agentId; }
     public void setAgentId(String agentId) { this.agentId = agentId; }
+
+    // Getter correcto para agentEmail
     public String getAgentEmail() { return agentEmail; }
     public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
     public Date getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(Date fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
     public double getLatitud() { return latitud; }
     public void setLatitud(double latitud) { this.latitud = latitud; }
+
     public double getLongitud() { return longitud; }
     public void setLongitud(double longitud) { this.longitud = longitud; }
 }
