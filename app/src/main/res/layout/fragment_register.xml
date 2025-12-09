@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Gestiona tus inspecciones e inmuebles."
+        android:text="Compra y Gestiona inmuebles."
         android:textColor="@color/gray_text"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"

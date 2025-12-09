@@ -51,6 +51,7 @@
         <action
             android:id="@+id/action_gerente_to_detalle"
             app:destination="@id/detalleInmuebleFragment" />
+
     </fragment>
 
     <!-- CREAR INMUEBLE -->
@@ -76,6 +77,7 @@
         <action
             android:id="@+id/action_agente_to_detalle"
             app:destination="@id/detalleInmuebleFragment" />
+
     </fragment>
 
     <!-- DETALLE DEL INMUEBLE  -->
